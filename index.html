@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panda Chat</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Panda Chat</h1>
+    <nav>
+      <ul>
+        <li><a href="#">Inicio</a></li>
+        <li><a href="#">Contactos</a></li>
+        <li><a href="config.html">Configuración</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <div class="chat-container">
+      <div class="chat-messages"></div>
+      <div class="chat-input">
+        <input type="text" id="message-input" placeholder="Escribe un mensaje...">
+        <button id="send-button">Enviar</button>
+      </div>
+    </div>
+  </main>
+  <script>
+    const socket = new WebSocket('ws://172.16.2.29:3000'); // Usa la IP de tu máquina
+
+    socket.onopen = function() {
+      console.log('Conexión WebSocket establecida');
+    };
+
+    socket.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      addMessage(data.sender, data.message);
+    };
+
+    function sendMessage(message) {
+      const data = { sender: 'You', message: message };
+      socket.send(JSON.stringify(data));
+    }
+
+    function addMessage(sender, message) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message');
+      messageElement.classList.add(sender);
+      messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+      document.querySelector('.chat-messages').appendChild(messageElement);
+    }
+
+    document.getElementById('send-button').addEventListener('click', function() {
+      const message = document.getElementById('message-input').value.trim();
+      if (message) {
+        addMessage('You', message);
+        sendMessage(message);
+        document.getElementById('message-input').value = '';
+      }
+    });
+  </script>
+</body>
+</html>
